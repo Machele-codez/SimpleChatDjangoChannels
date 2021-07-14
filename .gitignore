@@ -1,0 +1,7 @@
+django_chat_env
+.env
+*.sqlite3
+*.db
+*.pyc
+*.svg
+static

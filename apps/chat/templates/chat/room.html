@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django Chat - with Sockets</title>
+
+    <style>
+        * {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .container {
+            margin: 0 auto;
+            width: 90%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal {
+            margin-top: 100px;
+            width: 50%;
+            border: 1px solid grey;
+        }
+
+        .top {
+            background-color: brown;
+            padding: 20px;
+            color: wheat;
+            height: 15%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .chat-details {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .form-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .form-wrapper .chat-messages {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            min-height: 50px;
+            padding: 10px;
+        }
+
+        .chat-messages div {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            background-color: bisque;
+            margin: 10px;
+            width: 50%;
+        }
+        
+        .chat_message_username {
+            font-family: cursive;
+            color: brown;
+        }
+
+        .chat_message_text {
+
+        }
+
+        .form-wrapper form {
+            display: flex;
+            flex-flow: column;
+            width: 50%;
+            align-self: center;
+        }
+
+        input {
+            display: block;
+            border: none;
+            height: 1.5rem;
+            border: 2px solid burlywood;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        button[type="submit"] {
+            background: none;
+            border: none;
+            background-color: brown;
+            height: 2.5rem;
+            width: 60%;
+            border-radius: 1rem;
+            align-self: center;
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="modal">
+            <div class="top">
+                <h2>Chele Chat</h2>
+                <div class="chat-details">
+                    <h3>Room: {{room_name}}</h3>
+                    <h3>User: {{username}}</h3>
+                </div>
+            </div>
+            <div class="form-wrapper">
+                <div class="chat-messages"></div>
+
+                <form id="send-message-form">
+                    <input type="text" name="message" id="message" placeholder="Enter message..." required>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- to be able to get context data to JS -->
+    {{ room_name | json_script:"json-room_name" }}
+    {{ username | json_script:"json-username" }}
+
+    <script>
+        // focus on message input box
+        document.querySelector('input[name="message"]').focus();
+
+        let
+            roomName = JSON.parse(document.getElementById("json-room_name").textContent),
+            username = JSON.parse(document.getElementById("json-username").textContent);
+
+        // creating web socket via which chat messages are to be sent
+        const chatSocket = new WebSocket(`ws://${location.host}/ws/${roomName}/`)
+
+        
+        // event handler for when socket connection closes
+        chatSocket.addEventListener("close", e => {
+            alert("connection closed unexpectedly");
+        })
+
+        // Form event handler to send chat message via socket
+        document.getElementById("send-message-form").addEventListener("submit", e => {
+            e.preventDefault();
+            
+            const message = e.target.message.value.trim();
+            
+            chatSocket.send(JSON.stringify({
+                username: username,
+                room_name: roomName,
+                message: message
+            }))
+            
+            e.target.reset();
+        })
+        
+        // event handler for when socket receives a message
+        chatSocket.addEventListener("message", e => {
+            const data = JSON.parse(e.data);
+
+            // if the data Object contains a message
+            // add the message to the HTML of the page
+            if (data.message) {
+                document.querySelector(".chat-messages").innerHTML += `
+                    <div class="chat_message">
+                        <p class="chat_message_username">${data.username}</p>
+                        <p class="chat_message_text">${data.message}</p>
+                    </div>
+                `
+                console.log(data);
+            }
+        })
+        
+    </script>
+
+</body>
+
+</html>

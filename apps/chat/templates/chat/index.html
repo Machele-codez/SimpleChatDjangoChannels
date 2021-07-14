@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django Chat - with Sockets</title>
+
+    <style>
+        * {
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .container {
+            margin: 0 auto;
+            width: 90%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal {
+            margin-top: 100px;
+            width: 50%;
+            border: 1px solid grey;
+        }
+
+        .top {
+            background-color: brown;
+            padding: 20px;
+            color: wheat;
+            height: 15%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .form-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+        }
+
+        .form-wrapper form {
+            display: flex;
+            flex-flow: column;
+        }
+
+        .form-wrapper label {}
+
+        input {
+            display: block;
+            border: none;
+            height: 1.5rem;
+            border: 2px solid burlywood;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        button[type="submit"] {
+            background: none;
+            border: none;
+            background-color: brown;
+            height: 2.5rem;
+            width: 60%;
+            border-radius: 1rem;
+            align-self: center;
+            cursor: pointer;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="modal">
+            <div class="top">
+                <h2>Chele Chat</h2>
+                <span>A simple chat application built with Django, Channels and Redis</span>
+            </div>
+            <div class="form-wrapper">
+                <form id="room-form">
+                    <label for="room-name">Room name</label>
+                    <input type="text" name="roomname" id="room-name" placeholder="room name" required>
+                    <label for="username">Username</label>
+                    <input type="text" name="username" id="username" placeholder="username" required>
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelector("input[name='roomname']").focus();
+
+        // form submit event handler
+        document.getElementById("room-form").addEventListener('submit', e => {
+            e.preventDefault();
+            
+            let 
+                username = e.target.username.value,
+                roomName = e.target.roomname.value;
+            
+            // redirect to room page
+            location.replace(`${roomName}/?username=${username}`)
+        })
+    </script>
+
+</body>
+
+</html>
