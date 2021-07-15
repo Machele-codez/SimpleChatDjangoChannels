@@ -21,9 +21,11 @@
         }
 
         .modal {
-            margin-top: 100px;
+            margin-top: 20px;
             width: 50%;
             border: 1px solid grey;
+            display: flex;
+            flex-direction: column;
         }
 
         .top {
@@ -45,41 +47,47 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            margin: 30px 0;
         }
 
         .form-wrapper .chat-messages {
             display: flex;
             flex-direction: column;
-            justify-content: space-evenly;
-            min-height: 50px;
             padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
         }
 
+        /* purposely for individual chat messages */
         .chat-messages div {
             padding: 10px;
             display: flex;
             flex-direction: column;
-            justify-content: space-evenly;
             background-color: bisque;
             margin: 10px;
             width: 50%;
         }
-        
+
+        .chat-messages .no-message {
+            padding: 10px;
+            margin: auto;
+            text-align: center;
+            background-color: bisque;
+            color: brown;
+        }
+
         .chat_message_username {
             font-family: cursive;
             color: brown;
         }
 
-        .chat_message_text {
-
-        }
+        .chat_message_text {}
 
         .form-wrapper form {
             display: flex;
             flex-flow: column;
             width: 50%;
             align-self: center;
+            margin: 30px 0;
         }
 
         input {
@@ -138,8 +146,29 @@
     {{ username | json_script:"json-username" }}
 
     <script>
+        // element where chats are displayed
+        const chatsDiv = document.querySelector(".chat-messages");
+        
+        // function to scroll to bottom of chat
+        let scrollToBottomOfChat = () => {
+            chatsDiv.scrollTop = chatsDiv.scrollHeight;
+        }
+        
         // focus on message input box
         document.querySelector('input[name="message"]').focus();
+
+        // scroll to bottom of chat
+        scrollToBottomOfChat();
+
+        // if no messages exist yet, then display some no messages text
+        if (chatsDiv.innerHTML.trim() === '') {
+            chatsDiv.innerHTML = `
+                <div class="no-message">
+                    <p>No messages here yet...</p>    
+                </div>
+            `
+        }
+
 
         let
             roomName = JSON.parse(document.getElementById("json-room_name").textContent),
@@ -148,27 +177,27 @@
         // creating web socket via which chat messages are to be sent
         const chatSocket = new WebSocket(`ws://${location.host}/ws/${roomName}/`)
 
-        
+
         // event handler for when socket connection closes
         chatSocket.addEventListener("close", e => {
-            alert("connection closed unexpectedly");
+            alert("connection closed unexpectedly, please reload page");
         })
 
         // Form event handler to send chat message via socket
         document.getElementById("send-message-form").addEventListener("submit", e => {
             e.preventDefault();
-            
+
             const message = e.target.message.value.trim();
-            
+
             chatSocket.send(JSON.stringify({
                 username: username,
                 room_name: roomName,
                 message: message
             }))
-            
+
             e.target.reset();
         })
-        
+
         // event handler for when socket receives a message
         chatSocket.addEventListener("message", e => {
             const data = JSON.parse(e.data);
@@ -176,16 +205,23 @@
             // if the data Object contains a message
             // add the message to the HTML of the page
             if (data.message) {
-                document.querySelector(".chat-messages").innerHTML += `
+                // if no messages element exists, then remove it
+                if (document.querySelector(".no-message")) {
+                    chatsDiv.removeChild(document.querySelector(".no-message"));
+                }
+
+                chatsDiv.innerHTML += `
                     <div class="chat_message">
                         <p class="chat_message_username">${data.username}</p>
                         <p class="chat_message_text">${data.message}</p>
                     </div>
                 `
-                console.log(data);
+                
+                // scroll to bottom of chat 
+                scrollToBottomOfChat();
             }
         })
-        
+
     </script>
 
 </body>

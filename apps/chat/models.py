@@ -9,3 +9,6 @@ class ChatMessage(models.Model):
 
     class Meta:
         ordering = ('date_time_added',)
+
+    def __repr__(self):
+        return self.message_text
