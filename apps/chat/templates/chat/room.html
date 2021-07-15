@@ -116,7 +116,14 @@
                 </div>
             </div>
             <div class="form-wrapper">
-                <div class="chat-messages"></div>
+                <div class="chat-messages">
+                    {% for chat_message in chat_messages %}
+                    <div class="chat_message">
+                        <p class="chat_message_username">{{chat_message.username}}</p>
+                        <p class="chat_message_text">{{chat_message.message_text}}</p>
+                    </div>
+                    {% endfor %}
+                </div>
 
                 <form id="send-message-form">
                     <input type="text" name="message" id="message" placeholder="Enter message..." required>

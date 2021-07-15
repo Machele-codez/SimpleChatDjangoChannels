@@ -1,7 +1,7 @@
 from django.db import models
 
 # Create your models here.
-class Message(models.Model):
+class ChatMessage(models.Model):
     username = models.CharField(max_length=255)
     room_name = models.CharField(max_length=255)
     message_text = models.TextField()

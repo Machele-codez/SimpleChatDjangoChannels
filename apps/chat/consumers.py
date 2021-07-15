@@ -5,6 +5,8 @@ from pprint import pprint
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 
+from .models import ChatMessage
+
 class ChatConsumer (AsyncWebsocketConsumer):
     # ! all functions should be async
     async def connect(self):
@@ -27,12 +29,15 @@ class ChatConsumer (AsyncWebsocketConsumer):
             self.channel_name
         )
 
-    # Receive message from web socket
+    # On receive message from web socket
     async def receive(self, text_data):
         data = json.loads(text_data)
         username, room_name, message =  itemgetter("username", "room_name", "message") (data)
 
-        # send message to channel layer  
+        # add received message to DB
+        await self.store_chat_messsage(username=username, room_name=room_name, message=message)
+
+        # broadcast message to room group on the channel layer  
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -42,7 +47,7 @@ class ChatConsumer (AsyncWebsocketConsumer):
             }
         )
 
-    # Receive message from room group
+    # When message is received by a channel, send it to the client
     async def chat_message(self, event):
         username = event["username"]
         message = event["message"]
@@ -52,3 +57,7 @@ class ChatConsumer (AsyncWebsocketConsumer):
             'message': message
         }))
         
+    
+    @sync_to_async
+    def store_chat_messsage(self, username, room_name, message):
+        ChatMessage.objects.create(username=username, room_name=room_name, message_text=message)
