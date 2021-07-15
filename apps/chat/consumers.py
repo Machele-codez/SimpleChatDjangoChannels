@@ -18,7 +18,7 @@ class ChatConsumer (AsyncWebsocketConsumer):
             self.room_group_name,
             self.channel_name
         )
-
+        
         # accept connection
         await self.accept()
 
