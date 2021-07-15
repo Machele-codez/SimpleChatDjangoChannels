@@ -220,5 +220,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
 ```
 
 **- Frontend Handles Echoed Message from Backend**
-When the message is sent back to the frontend, 
+When the message is sent back to the frontend, the onmessage web socket event handler is invoked
+and the message is appended to the HTML.
+```js
+// event handler for when socket receives a message
+chatSocket.addEventListener("message", e => {
+    const data = JSON.parse(e.data);
+
+    // if the data Object contains a message
+    // add the message to the HTML of the page
+    if (data.message) {
+        document.querySelector(".chat-messages").innerHTML += `
+            <div class="chat_message">
+                <p class="chat_message_username">${data.username}</p>
+                <p class="chat_message_text">${data.message}</p>
+            </div>
+        `
+        console.log(data);
+    }
+})
+```
 
