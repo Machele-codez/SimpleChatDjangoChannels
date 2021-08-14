@@ -1,0 +1,4 @@
+# dummy environment variables
+STATUS = "Test"
+AMOUNT = 5
+TIMELINE = "600hrs"
